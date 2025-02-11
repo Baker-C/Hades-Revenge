@@ -22,7 +22,7 @@ public class TimeManager : MonoBehaviour
             }
             return _instance;
         }
-    }    
+    }
 
     private void Awake()
     {

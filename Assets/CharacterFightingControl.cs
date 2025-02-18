@@ -36,17 +36,17 @@ public class CharacterFightingControl : CharacterControl
         
         if (parryPressed)
         {
-            PlayerState.MakeBusy(GetAnimationLength("Parry"));
+            PlayerState.MakeBusyForTime(GetAnimationLength("Parry"));
             animator.Play("Parry", 0, 0.0f);
         }
         else if (punchPressed)
         {
-            PlayerState.MakeBusy(GetAnimationLength("Light Punch"));
+            PlayerState.MakeBusyForTime(GetAnimationLength("Light Punch"));
             animator.Play("Light Punch", 0, 0.0f);
         }
         else if (kickPressed)
         {
-            PlayerState.MakeBusy(GetAnimationLength("Roundhouse Kick"));
+            PlayerState.MakeBusyForTime(GetAnimationLength("Roundhouse Kick"));
             animator.Play("Roundhouse Kick", 0, 0.0f);
         }
         

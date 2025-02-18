@@ -59,14 +59,13 @@
     <UnityVersion>6000.0.32f1</UnityVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Analyzer Include="C:\Users\Me\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.0.5\Analyzers\Microsoft.Unity.Analyzers.dll" />
+    <Analyzer Include="C:\Users\Me\.vscode\extensions\visualstudiotoolsforunity.vstuc-1.1.0\Analyzers\Microsoft.Unity.Analyzers.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.32f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.SourceGenerators.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.32f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.Properties.SourceGenerator.dll" />
     <Analyzer Include="C:\Program Files\Unity\Hub\Editor\6000.0.32f1\Editor\Data\Tools\Unity.SourceGenerators\Unity.UIToolkit.SourceGenerator.dll" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Player\SideStep.cs" />
-    <Compile Include="Assets\Player\CameraLock.cs" />
     <Compile Include="Assets\Player\DirectionalMovement.cs" />
     <Compile Include="Assets\TimeManagement\SlowMotionTrigger.cs" />
     <Compile Include="Assets\CharacterFightingControl.cs" />
@@ -75,11 +74,13 @@
     <Compile Include="Assets\Player\PlayerHealth.cs" />
     <Compile Include="Assets\TimeManagement\TimeManager.cs" />
     <Compile Include="Assets\CubeMovement\HoverRotate.cs" />
+    <Compile Include="Assets\ThirdPersonCam.cs" />
     <Compile Include="Assets\Player\PlayerState.cs" />
+    <Compile Include="Assets\OrientationFollow.cs" />
+    <Compile Include="Assets\Player\UnlockedMovement.cs" />
     <Compile Include="Assets\Hitbox.cs" />
     <Compile Include="Assets\Player\PlayerControl.cs" />
     <Compile Include="Assets\Player\PlayerHitboxControl.cs" />
-    <Compile Include="Assets\Player\MouseLook.cs" />
     <Compile Include="Assets\Enemy\EnemyAttack.cs" />
     <Compile Include="Assets\CharacterControl.cs" />
   </ItemGroup>

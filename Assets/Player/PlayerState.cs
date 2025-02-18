@@ -58,7 +58,17 @@ public class PlayerState : MonoBehaviour
         return _instance.busy;
     }
 
-    public static void MakeBusy(float time)
+    public static void MakeBusy()
+    {
+        _instance.busy = true;
+    }
+
+    public static void Free()
+    {
+        _instance.busy = false;
+    }
+
+    public static void MakeBusyForTime(float time)
     {
         _instance.StartCoroutine(_instance.BusyRoutine(time));
     }

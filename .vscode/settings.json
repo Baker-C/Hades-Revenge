@@ -56,5 +56,7 @@
         "temp/": true,
         "Temp/": true
     },
-    "dotnet.defaultSolution": "SunderedPeace_Prototype.sln"
+    "dotnet.defaultSolution": "SunderedPeace_Prototype.sln",
+    "editor.codeLens": false
+
 }

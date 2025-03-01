@@ -22,6 +22,7 @@ public class Hitbox : MonoBehaviour
     {
         Hurtbox hurtBox = other.GetComponent<Hurtbox>();
         Debug.Log("Hitbox collided with " + hurtBox);
+        
     }
 
     public void EnableHitbox()

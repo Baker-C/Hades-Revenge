@@ -28,7 +28,6 @@ public class Hurtbox : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
-        // First check if collider has Hitbox component
         Hitbox hitBox = other.GetComponent<Hitbox>();
         if (hitBox == null)
         {
@@ -36,22 +35,14 @@ public class Hurtbox : MonoBehaviour
             return;
         }
 
-        // Then check if hitbox is active
-        if (!hitBox.gameObject.activeInHierarchy)
-        {
-            Debug.Log($"Hitbox {hitBox.gameObject.name} is inactive");
-            return;
-        }
-
-        // Finally check if hitbox belongs to different entity
         if (hitBox.transform.parent == transform.parent)
         {
             Debug.Log($"Hitbox belongs to same parent, ignoring collision");
             return;
         }
 
-        // All checks passed, apply damage and knockback
         Debug.Log($"Valid hitbox collision with: {hitBox.gameObject.name}");
+        Debug.Log("CharControl: "+cc);
         Vector3 direction = (transform.position - other.transform.position).normalized;
         cc.ApplyKnockback(direction);
         if (pHealth != null)

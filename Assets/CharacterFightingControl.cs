@@ -10,6 +10,7 @@ public class CharacterFightingControl : CharacterControl
     {
         animator = GetComponent<Animator>();  
         ps = GetComponent<PlayerState>();
+        
     }
 
     // Update is called once per frame
@@ -33,21 +34,26 @@ public class CharacterFightingControl : CharacterControl
 
     void HandleAttack(bool punchPressed, bool kickPressed, bool parryPressed)
     {
-        
         if (parryPressed)
         {
-            PlayerState.MakeBusyForTime(GetAnimationLength("Parry"));
             animator.Play("Parry", 0, 0.0f);
+            float animationLength = GetAnimationLength("Parry");
+            PlayerState.MakeBusyForTime(animationLength);
+            AttackMove(animationLength, 0.3f);
         }
         else if (punchPressed)
         {
-            PlayerState.MakeBusyForTime(GetAnimationLength("Light Punch"));
+            float animationLength = GetAnimationLength("Light Punch", 1.4f);
             animator.Play("Light Punch", 0, 0.0f);
+            PlayerState.MakeBusyForTime(animationLength);
+            AttackMove(animationLength, 0.3f);
         }
         else if (kickPressed)
         {
-            PlayerState.MakeBusyForTime(GetAnimationLength("Roundhouse Kick"));
+            float animationLength = GetAnimationLength("Roundhouse Kick", 1.6f);
             animator.Play("Roundhouse Kick", 0, 0.0f);
+            PlayerState.MakeBusyForTime(animationLength);
+            AttackMove(animationLength, 0.3f);
         }
         
     }

@@ -12,53 +12,58 @@ public class UnlockedMovement : MonoBehaviour
     public float rotationSpeed;
     public float acceleration;
     public float deceleration;
-    private float movementX = 0.0f;
-    private float movementZ = 0.0f;
-    private bool lockedOn = false;
+
+    float movementX = 0.0f;
+    float movementZ = 0.0f;
+    Vector3 movement;
+    Vector3 inputDirection;
+    bool forwardPressed;
+    bool backPressed;
+    bool leftPressed;
+    bool rightPressed;
+    bool sprintPressed;
+
+
+    
     private PlayerControl pc;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
         pc = GetComponent<PlayerControl>();
+        rb = GetComponent<Rigidbody>();
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
-        float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        if (PlayerState.IsBusy())
+            return;
 
-        bool verticalPressed = Input.GetKey("w") || Input.GetKey("s");
-        bool horizontalPressed = Input.GetKey("a") || Input.GetKey("d");
-        bool sprintPressed = Input.GetKey("left shift");
+        forwardPressed = Input.GetKey("w");
+        backPressed = Input.GetKey("s");
+        leftPressed = Input.GetKey("a");
+        rightPressed = Input.GetKey("d");
+        sprintPressed = Input.GetKey("left shift");
 
         // Move Player
-        Vector3 movement = CalculateVelocity(horizontal, vertical, sprintPressed);
-        transform.position += movement * Time.deltaTime;
+        CalculateVelocity();
+        transform.position += movement * Time.fixedDeltaTime;
 
-        pc.AnimateMovement(0f, movement.magnitude * 2 / sprintSpeed);
+        // // Animate - MAY USE LATER, MAY NOT
+        // // Get dot product between forward vectors
+        // float dotProduct = Vector3.Dot(transform.forward, inputDirection.normalized);
+        // // Convert to angle (in radians)
+        // float angle = Mathf.Acos(dotProduct);
+        // Debug.Log("Angle in radians: " + angle);
 
-        // move player relative to camera orientation
-        Vector3 inputDirection = camera.forward * (verticalPressed ? vertical : 0) + camera.right * (horizontalPressed ? horizontal : 0);
-        inputDirection.y = 0f;
+        // float velocityX = transform.forward.magnitude * Mathf.Asin(angle);
+        // float velocityZ = transform.forward.magnitude * Mathf.Acos(angle);
 
-        // Animate
-        // Get dot product between forward vectors
-        float dotProduct = Vector3.Dot(transform.forward, inputDirection.normalized);
-        // Convert to angle (in radians)
-        float angleInRadians = Mathf.Acos(dotProduct);
-        Debug.Log("Angle in radians: " + angleInRadians);
-        // Convert to degrees if needed
-        float angleInDegrees = angleInRadians * Mathf.Rad2Deg;
-        Debug.Log("Angle in degrees: " + angleInDegrees);
-        float velocityX = transform.forward.magnitude * Mathf.Asin(angleInDegrees);
-        float velocityZ = transform.forward.magnitude * Mathf.Acos(angleInDegrees);
+        // if (angle < 0.1f)
+        //     velocityZ = 2;
 
-        if (angleInDegrees < 10f)
-            velocityZ = 2;
-
-        pc.AnimateMovement(velocityX, velocityZ);
-
+        // Move player relative to camera orientation
+        CalculateDirection();
 
         Vector3 playerOrigin = transform.position;
 
@@ -68,78 +73,79 @@ public class UnlockedMovement : MonoBehaviour
         // Draw the movement direction (Blue)
         Debug.DrawRay(playerOrigin, inputDirection * 5f, Color.blue);
 
+        Quaternion targetRotation = Quaternion.LookRotation(inputDirection);
+        
+        // Rotate player to face the movement direction
+        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
 
-        if (inputDirection != Vector3.zero)
-        {
-            Quaternion targetRotation = Quaternion.LookRotation(inputDirection);
-            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.deltaTime * rotationSpeed);
-        }
+        Debug.Log("Directions: " + inputDirection + " " + transform.forward);
+
+        // Animate player
+        pc.AnimateMovement(0f, Mathf.Abs(movement.magnitude) * 2 / sprintSpeed);
     }
 
-    Vector3 CalculateVelocity(float horizontal, float vertical, bool sprintPressed)
-    {
-        bool forwardPressed = vertical > 0;
-        bool leftPressed = horizontal < 0;
-        bool rightPressed = horizontal > 0;
-        bool backPressed = vertical < 0;
 
+    void CalculateVelocity()
+    {
         float maxSpeed = sprintPressed ? sprintSpeed : walkSpeed;
 
         // Acceleration
         if (forwardPressed && movementZ < maxSpeed)
-            movementZ += Time.deltaTime * acceleration;
+            movementZ += Time.fixedDeltaTime * acceleration;
         if (backPressed && movementZ > -maxSpeed)
-            movementZ -= Time.deltaTime * acceleration;
+            movementZ -= Time.fixedDeltaTime * acceleration;
         if (leftPressed && movementX > -maxSpeed)
-            movementX -= Time.deltaTime * acceleration;
+            movementX -= Time.fixedDeltaTime * acceleration;
         if (rightPressed && movementX < maxSpeed)
-            movementX += Time.deltaTime * acceleration;
+            movementX += Time.fixedDeltaTime * acceleration;
         
         // Deceleration
         if (!forwardPressed && movementZ > 0.0f)
-            movementZ -= Time.deltaTime * deceleration;
+            movementZ -= Time.fixedDeltaTime * deceleration;
         if (!backPressed && movementZ < 0.0f)
-            movementZ += Time.deltaTime * deceleration;
+            movementZ += Time.fixedDeltaTime * deceleration;
         if (!leftPressed && movementX < 0.0f)
-            movementX += Time.deltaTime * deceleration;
+            movementX += Time.fixedDeltaTime * deceleration;
         if (!rightPressed && movementX > 0.0f)
-            movementX -= Time.deltaTime * deceleration;
+            movementX -= Time.fixedDeltaTime * deceleration;
 
         // Deceleration to walking
         if (movementZ > maxSpeed && movementZ > 0.0f)
-            movementZ -= Time.deltaTime * deceleration;
+            movementZ -= Time.fixedDeltaTime * deceleration;
         if (movementZ < -maxSpeed && movementZ < 0.0f)
-            movementZ += Time.deltaTime * deceleration;
+            movementZ += Time.fixedDeltaTime * deceleration;
         if (movementX < -maxSpeed && movementX < 0.0f)
-            movementX += Time.deltaTime * deceleration;
+            movementX += Time.fixedDeltaTime * deceleration;
         if (movementX > maxSpeed && movementX > 0.0f)
-            movementX -= Time.deltaTime * deceleration;
+            movementX -= Time.fixedDeltaTime * deceleration;
 
         // Clamp the velocity values to zero if they are close to zero
-        if (Mathf.Abs(movementX) < 0.03f)
+        if (Mathf.Abs(movementX) < 0.1f)
             movementX = 0.0f;
-        if (Mathf.Abs(movementZ) < 0.03f)
+            rb.linearVelocity = new Vector3(0,0,0);
+        if (Mathf.Abs(movementZ) < 0.1f)
             movementZ = 0.0f;
+            rb.linearVelocity = new Vector3(0,0,0);
+        
+        Vector3 camForward = camera.forward;
+        Vector3 camRight = camera.right;
+        camForward.y = 0f;
+        camRight.y = 0f;
+        camForward.Normalize();
+        camRight.Normalize();
 
-        // Create local movement vector
-        Vector3 localVelocity = new Vector3(movementX, 0.0f, movementZ);
-
-        // Create camera-relative movement vector
-        Vector3 cameraForward = camera.forward;
-        Vector3 cameraRight = camera.right;
-        
-        // Zero out Y components to keep movement horizontal
-        cameraForward.y = 0f;
-        cameraRight.y = 0f;
-        
-        // Normalize to maintain consistent speed
-        cameraForward.Normalize();
-        cameraRight.Normalize();
-        
         // Calculate final movement vector
-        Vector3 movement = cameraForward * localVelocity.z + cameraRight * localVelocity.x;
-        return movement;
+        movement = camForward * movementZ + camRight * movementX;
+        movement.y = 0f;
     }
 
+
+    void CalculateDirection()
+    {
+        inputDirection = camera.forward * (forwardPressed ? 1 : 0) + camera.right * (rightPressed ? 1 : 0) + camera.forward * (backPressed ? -1 : 0) + camera.right * (leftPressed ? -1 : 0);
+
+        inputDirection.y = 0f;
+        inputDirection.Normalize();
+    }
 
 }

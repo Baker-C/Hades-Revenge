@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using Random = System.Random;
 
 public class EnemyFollow : CharacterControl
 {
@@ -14,6 +15,9 @@ public class EnemyFollow : CharacterControl
     private int VelocityXHash; // Hash for the Velocity X parameter in the Animator
     private int VelocityZHash; // Hash for the Velocity Z parameter in the Animator
 
+    private int offset = 0;
+    System.Random rand = new System.Random();
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     override protected void Start()
     {
@@ -23,6 +27,7 @@ public class EnemyFollow : CharacterControl
         // Cache animation parameter hashes
         VelocityXHash = Animator.StringToHash("Velocity X");
         VelocityZHash = Animator.StringToHash("Velocity Z");
+        StartCoroutine(OffsetRoutine());
     }
 
     // Update is called once per frame
@@ -31,9 +36,28 @@ public class EnemyFollow : CharacterControl
         FollowPlayer();
     }
 
+    IEnumerator OffsetRoutine()
+    {
+        while (true)
+        {
+            offset = 1;
+            yield return new WaitForSeconds(rand.Next(1, 3));
+            offset = 0;
+            yield return new WaitForSeconds(10f);
+        }
+    }
+
     void FollowPlayer()
     {
-        direction = playerObject.transform.position - transform.position;
+        if (offset != 0)
+        {
+            direction = playerObject.transform.position - transform.position;
+            direction.z = direction.z * -1;
+        }
+        else 
+        {
+            direction = playerObject.transform.position - transform.position;
+        }
 
         // Rotate towards player
         Quaternion targetRotation = Quaternion.LookRotation(direction);

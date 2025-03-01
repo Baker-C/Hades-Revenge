@@ -4,8 +4,8 @@ using System.Collections;
 public class PlayerState : MonoBehaviour
 {
     [SerializeField] float fHealth = 100.0f;
+    [SerializeField] Vector3 spawnPosition = new Vector3(0, 0.1f, 0);
     
-    float health; 
     bool busy;
 
     static PlayerState _instance;
@@ -37,20 +37,16 @@ public class PlayerState : MonoBehaviour
         {
             Destroy(gameObject);
         }
-
-        health = fHealth;
     }
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public static Vector3 GetSpawnPosition()
     {
-        
+        return _instance.spawnPosition;
     }
 
-    // Update is called once per frame
-    void Update()
+    public static void SetSpawnPosition(Vector3 position)
     {
-        
+        _instance.spawnPosition = position;
     }
 
     public static bool IsBusy()
@@ -80,24 +76,18 @@ public class PlayerState : MonoBehaviour
         busy = false;
     }
 
-    public static float GetFullHealth()
+    public static void Respawn(GameObject go)
     {
-        return _instance.fHealth;
+        _instance.StartCoroutine(_instance.RespawnCoroutine(go));
     }
 
-    public static float GetCurrentHealth()
+    private IEnumerator RespawnCoroutine(GameObject go)
     {
-        return _instance.health;
-    }
-
-    public static void IncrementHealth(float heals)
-    {
-        _instance.health += heals;
-    }
-
-    public static void DecrementHealth(float dmg)
-    {
-        _instance.health -= dmg;
+        yield return new WaitForSeconds(3.0f);
+        Debug.Log("Character Spawned");
+        go.SetActive(true);
+        go.transform.position = spawnPosition;
+        go.GetComponent<CharacterHealth>().ResetHealth();
     }
 }
 

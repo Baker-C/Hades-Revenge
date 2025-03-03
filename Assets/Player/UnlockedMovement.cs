@@ -84,44 +84,22 @@ public class UnlockedMovement : MonoBehaviour
     {
         float maxSpeed = sprintPressed ? sprintSpeed : walkSpeed;
 
-        // Acceleration
-        if (forwardPressed && movementZ < maxSpeed)
-            movementZ += Time.fixedDeltaTime * acceleration;
-        if (backPressed && movementZ > -maxSpeed)
-            movementZ -= Time.fixedDeltaTime * acceleration;
-        if (leftPressed && movementX > -maxSpeed)
-            movementX -= Time.fixedDeltaTime * acceleration;
-        if (rightPressed && movementX < maxSpeed)
-            movementX += Time.fixedDeltaTime * acceleration;
-        
-        // Deceleration
-        if (!forwardPressed && movementZ > 0.0f)
-            movementZ -= Time.fixedDeltaTime * deceleration;
-        if (!backPressed && movementZ < 0.0f)
-            movementZ += Time.fixedDeltaTime * deceleration;
-        if (!leftPressed && movementX < 0.0f)
-            movementX += Time.fixedDeltaTime * deceleration;
-        if (!rightPressed && movementX > 0.0f)
-            movementX -= Time.fixedDeltaTime * deceleration;
+        Vector2 inputDir = new Vector2(
+            (rightPressed ? 1 : 0) - (leftPressed ? 1 : 0),
+            (forwardPressed ? 1 : 0) - (backPressed ? 1 : 0)
+        ).normalized;
 
-        // Deceleration to walking
-        if (movementZ > maxSpeed && movementZ > 0.0f)
-            movementZ -= Time.fixedDeltaTime * deceleration;
-        if (movementZ < -maxSpeed && movementZ < 0.0f)
-            movementZ += Time.fixedDeltaTime * deceleration;
-        if (movementX < -maxSpeed && movementX < 0.0f)
-            movementX += Time.fixedDeltaTime * deceleration;
-        if (movementX > maxSpeed && movementX > 0.0f)
-            movementX -= Time.fixedDeltaTime * deceleration;
+        if (inputDir.x != 0)
+            movementX = Mathf.MoveTowards(movementX, inputDir.x * maxSpeed, Time.fixedDeltaTime * acceleration);
+        if (inputDir.y != 0)
+            movementZ = Mathf.MoveTowards(movementZ, inputDir.y * maxSpeed, Time.fixedDeltaTime * acceleration);
 
-        // Clamp the velocity values to zero if they are close to zero
-        if (Mathf.Abs(movementX) < 0.1f)
-            movementX = 0.0f;
-            rb.linearVelocity = new Vector3(0,0,0);
-        if (Mathf.Abs(movementZ) < 0.1f)
-            movementZ = 0.0f;
-            rb.linearVelocity = new Vector3(0,0,0);
-        
+        if (inputDir.x == 0)
+            movementX = Mathf.MoveTowards(movementX, 0, Time.fixedDeltaTime * deceleration);
+        if (inputDir.y == 0)
+            movementZ = Mathf.MoveTowards(movementZ, 0, Time.fixedDeltaTime * deceleration);
+
+        // Convert to camera relative movement
         Vector3 camForward = camera.forward;
         Vector3 camRight = camera.right;
         camForward.y = 0f;
@@ -129,9 +107,7 @@ public class UnlockedMovement : MonoBehaviour
         camForward.Normalize();
         camRight.Normalize();
 
-        // Calculate final movement vector
-        movement = camForward * movementZ + camRight * movementX;
-        movement.y = 0f;
+        movement = (camForward * movementZ + camRight * movementX);
     }
 
 

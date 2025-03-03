@@ -28,6 +28,14 @@ public class Hurtbox : MonoBehaviour
 
     void OnTriggerEnter(Collider other)
     {
+            // Check if the collider is enabled
+        if (!other.enabled)
+        {
+            Debug.Log($"Collider is disabled: {other.gameObject.name}");
+            return;
+        }
+
+        
         Hitbox hitBox = other.GetComponent<Hitbox>();
         if (hitBox == null)
         {
@@ -43,6 +51,7 @@ public class Hurtbox : MonoBehaviour
 
         Debug.Log($"Valid hitbox collision with: {hitBox.gameObject.name}");
         Debug.Log("CharControl: "+cc);
+
         Vector3 direction = (transform.position - other.transform.position).normalized;
         cc.ApplyKnockback(direction);
         if (pHealth != null)

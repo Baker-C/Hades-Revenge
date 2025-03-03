@@ -2418,7 +2418,7 @@ MonoBehaviour:
   rb: {fileID: 0}
   camera: {fileID: 330585546}
   sprintSpeed: 6
-  walkSpeed: 2.5
+  walkSpeed: 3.5
   rotationSpeed: 10
   acceleration: 30
   deceleration: 15
@@ -2440,10 +2440,12 @@ MonoBehaviour:
   lockOnCam: {fileID: 881070913}
   target: {fileID: 1350321463}
   sprintSpeed: 6
-  walkSpeed: 2.5
+  walkSpeed: 3
   rotationSpeed: 10
   acceleration: 30
   deceleration: 15
+  leftOffset: 0
+  rightOffset: 0
   maxNoticeAngle: 60
   noticeZone: 10
   targetLayers:
@@ -2467,8 +2469,8 @@ MonoBehaviour:
   collisionMask:
     serializedVersion: 2
     m_Bits: 8
-  distance: 3
-  duration: 0.4
+  distance: 2
+  duration: 0.2
   animationCurve:
     serializedVersion: 2
     m_Curve:
@@ -2484,11 +2486,11 @@ MonoBehaviour:
     - serializedVersion: 3
       time: 0.7
       value: 1
-      inSlope: -0.47164777
-      outSlope: -0.47164777
+      inSlope: 0.33267033
+      outSlope: 0.33267033
       tangentMode: 0
       weightedMode: 0
-      inWeight: 0.057059187
+      inWeight: 0.053555798
       outWeight: 0
     m_PreInfinity: 2
     m_PostInfinity: 2
@@ -2524,6 +2526,10 @@ PrefabInstance:
     - target: {fileID: 207625199901953028, guid: 8f610abd9c4480e4586a8d0099132408, type: 3}
       propertyPath: m_Name
       value: Enemy Bot
+      objectReference: {fileID: 0}
+    - target: {fileID: 207625199901953028, guid: 8f610abd9c4480e4586a8d0099132408, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 696495160210691774, guid: 8f610abd9c4480e4586a8d0099132408, type: 3}
       propertyPath: m_LocalPosition.x
@@ -2564,6 +2570,18 @@ PrefabInstance:
     - target: {fileID: 696495160210691774, guid: 8f610abd9c4480e4586a8d0099132408, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5719968119920699429, guid: 8f610abd9c4480e4586a8d0099132408, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7519643131303779177, guid: 8f610abd9c4480e4586a8d0099132408, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7716206279652960943, guid: 8f610abd9c4480e4586a8d0099132408, type: 3}
+      propertyPath: m_Enabled
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

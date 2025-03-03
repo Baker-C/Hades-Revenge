@@ -14,8 +14,10 @@ public class CharacterControl : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Start()
     {
-        animator = GetComponent<Animator>(); 
-        rb = GetComponent<Rigidbody>(); 
+        if (animator == null)
+            animator = GetComponent<Animator>(); 
+        if (rb == null)
+            rb = GetComponent<Rigidbody>(); 
     }
 
     public virtual void ApplyKnockback(Vector3 direction)
@@ -29,12 +31,10 @@ public class CharacterControl : MonoBehaviour
     protected float GetAnimationLength(string clipName, float effectiveSpeed = 1f)
     {
         AnimationClip clip = animator.runtimeAnimatorController.animationClips
-            .FirstOrDefault(clip => clip.name == clipName);
-        
+            .FirstOrDefault(c => c.name == clipName);
+
         if (clip != null)
-        {
             return clip.length / effectiveSpeed;
-        }
         
         Debug.LogWarning($"Animation clip {clipName} not found!");
         return 0f;

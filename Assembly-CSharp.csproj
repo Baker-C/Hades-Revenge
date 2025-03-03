@@ -71,24 +71,23 @@
     <Compile Include="Assets\Enemy\EnemyFollow.cs" />
     <Compile Include="Assets\Hurtbox.cs" />
     <Compile Include="Assets\Player\Dash.cs" />
-    <Compile Include="Assets\ImportedAssets\GameFactory_Fire Tourch Mech\Files\Scripts\ItemScript\SimpleLockOn.cs" />
+    <Compile Include="Assets\Enemy\NavigationScript.cs" />
     <Compile Include="Assets\Player\PlayerHealth.cs" />
     <Compile Include="Assets\Player\LockedMovement.cs" />
     <Compile Include="Assets\TimeManagement\TimeManager.cs" />
     <Compile Include="Assets\ThirdPersonCam.cs" />
     <Compile Include="Assets\Player\LockOn.cs" />
     <Compile Include="Assets\Billboard.cs" />
-    <Compile Include="Assets\ImportedAssets\GameFactory_Fire Tourch Mech\Scripts\CameraFollow.cs" />
     <Compile Include="Assets\Player\PlayerState.cs" />
     <Compile Include="Assets\OrientationFollow.cs" />
     <Compile Include="Assets\Player\UnlockedMovement.cs" />
+    <Compile Include="Assets\Enemy\BasicEnemyAttack.cs" />
     <Compile Include="Assets\Hitbox.cs" />
     <Compile Include="Assets\CharacterHealth.cs" />
     <Compile Include="Assets\Player\PlayerControl.cs" />
     <Compile Include="Assets\Player\PlayerHitboxControl.cs" />
-    <Compile Include="Assets\GameFactory_Fire Tourch Mech\Scripts\EnemyLockOn.cs" />
-    <Compile Include="Assets\ImportedAssets\GameFactory_Fire Tourch Mech\Scripts\DefMovement.cs" />
-    <Compile Include="Assets\Enemy\EnemyAttack.cs" />
+    <Compile Include="Assets\Enemy\BasicEnemyController.cs" />
+    <Compile Include="Assets\Player\PlayerFightingControl.cs" />
     <Compile Include="Assets\CharacterControl.cs" />
   </ItemGroup>
   <ItemGroup>

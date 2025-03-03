@@ -17,6 +17,8 @@ public class UnlockedMovement : MonoBehaviour
     float movementZ = 0.0f;
     Vector3 movement;
     Vector3 inputDirection;
+    Vector3 targetDirection;
+
     bool forwardPressed;
     bool backPressed;
     bool leftPressed;
@@ -65,20 +67,13 @@ public class UnlockedMovement : MonoBehaviour
         // Move player relative to camera orientation
         CalculateDirection();
 
-        Vector3 playerOrigin = transform.position;
+        Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
 
-        // Draw the forward direction of the player (Red)
-        Debug.DrawRay(playerOrigin, transform.forward * 5f, Color.red);
-
-        // Draw the movement direction (Blue)
-        Debug.DrawRay(playerOrigin, inputDirection * 5f, Color.blue);
-
-        Quaternion targetRotation = Quaternion.LookRotation(inputDirection);
-        
-        // Rotate player to face the movement direction
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
-
-        Debug.Log("Directions: " + inputDirection + " " + transform.forward);
+        float angleDiff = Quaternion.Angle(transform.rotation, targetRotation);
+        if (angleDiff < 10f)
+            transform.rotation = targetRotation;
+        else
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
 
         // Animate player
         pc.AnimateMovement(0f, Mathf.Abs(movement.magnitude) * 2 / sprintSpeed);
@@ -144,8 +139,12 @@ public class UnlockedMovement : MonoBehaviour
     {
         inputDirection = camera.forward * (forwardPressed ? 1 : 0) + camera.right * (rightPressed ? 1 : 0) + camera.forward * (backPressed ? -1 : 0) + camera.right * (leftPressed ? -1 : 0);
 
+        if (inputDirection.magnitude == 0)
+            return;
+
         inputDirection.y = 0f;
         inputDirection.Normalize();
+        targetDirection = inputDirection;
     }
 
 }

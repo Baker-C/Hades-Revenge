@@ -40,35 +40,13 @@ public class LockedMovement : MonoBehaviour
 
     PlayerControl pc;
 
-
-//////////////////
-/// <summary>
-/// 
-/// </summary>
-
-
     [Header("Settings")]
     [SerializeField] bool zeroVert_Look;
-
     float currentYOffset;
-    Vector3 pos;
-
-    DefMovement defMovement;
-/// <summary>
-/// 
-/// </summary>
-//////////////////
-
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-        pc = GetComponent<PlayerControl>();
-    }
 
     void Awake()
     {
+        pc = GetComponent<PlayerControl>();
         CalculateTarget();
     }
 
@@ -102,7 +80,12 @@ public class LockedMovement : MonoBehaviour
 
         // Rotate player to face the target direction
         Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
-        transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
+
+        float angleDiff = Quaternion.Angle(transform.rotation, targetRotation);
+        if (angleDiff < 10f)
+            transform.rotation = targetRotation;
+        else
+            transform.rotation = Quaternion.Slerp(transform.rotation, targetRotation, Time.fixedDeltaTime * rotationSpeed);
     }
 
     void OnDrawGizmos()

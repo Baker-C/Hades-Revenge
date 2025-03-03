@@ -6,20 +6,16 @@ using System;
 public class PlayerControl : CharacterControl
 {
     [Header("References")]
-    [SerializeField] private LayerMask collisionMask;
-    [SerializeField] private Animator stateCamAnimator;
+    [SerializeField] LayerMask collisionMask;
+    [SerializeField] Animator stateCamAnimator;
 
-
-
-
-    PlayerState ps;
     int VelocityXHash;
     int VelocityZHash;
     int LockedOnHash;
 
-    private float velocityX = 0.0f;
-    private float velocityZ = 0.0f;
-    [SerializeField] private bool locked = false;
+    float velocityX = 0.0f;
+    float velocityZ = 0.0f;
+    [SerializeField] bool locked = false;
 
     UnlockedMovement unlockedMovement;
     LockedMovement lockedMovement;
@@ -28,7 +24,6 @@ public class PlayerControl : CharacterControl
     override protected void Start()
     {
         base.Start(); 
-        ps = FindFirstObjectByType<PlayerState>();
 
         VelocityXHash = Animator.StringToHash("Velocity X");  
         VelocityZHash = Animator.StringToHash("Velocity Z");
@@ -40,6 +35,9 @@ public class PlayerControl : CharacterControl
 
     void Update()
     {
+        if (PlayerState.IsBusy())
+            return;
+
         bool lockTogglePressed = Input.GetKeyDown("q");
         if (lockTogglePressed)
             ToggleLockedOn();
@@ -69,4 +67,6 @@ public class PlayerControl : CharacterControl
         PlayerState.MakeBusyForTime(GetAnimationLength("Knockback"));
         animator.Play("Knockback", 0, 0f);
     }
+
+    
 }

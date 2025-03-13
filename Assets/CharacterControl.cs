@@ -3,13 +3,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using UnityEngine.AI;
+
 
 public class CharacterControl : MonoBehaviour
 {
+    public CharacterHealth cHealth;
     [SerializeField] protected LayerMask environmentMask;
     protected Rigidbody rb;
     protected bool isKnockedBack = false;
     protected Animator animator;
+    protected NavMeshAgent agent;
+
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     protected virtual void Start()
@@ -18,13 +23,17 @@ public class CharacterControl : MonoBehaviour
             animator = GetComponent<Animator>(); 
         if (rb == null)
             rb = GetComponent<Rigidbody>(); 
+        cHealth = GetComponent<CharacterHealth>();
+        agent = GetComponent<NavMeshAgent>();
     }
 
-    public virtual void ApplyKnockback(Vector3 direction)
+    public virtual void ApplyKnockback(float amount, Vector3 direction)
     {
         animator = GetComponent<Animator>(); 
         rb = GetComponent<Rigidbody>(); 
-        rb.AddForce(direction * 10, ForceMode.Impulse);
+        
+        direction.Normalize();
+        rb.AddForce(direction * amount, ForceMode.Impulse);
         animator.Play("Knockback");
     }
 
@@ -73,9 +82,23 @@ public class CharacterControl : MonoBehaviour
 
     public virtual void Die()
     {
+        if (agent)
+            agent.isStopped = true;
         Debug.Log("Character died");
-        PlayerState.Respawn(gameObject);
-        gameObject.SetActive(false);   
+        animator.Play("Death");
+        animator.SetBool("Dead", true);
     }
 
+    IEnumerator DeathWait()
+    {
+        yield return new WaitForSeconds(3.0f);
+        if (agent)
+            agent.isStopped = false;
+        while (true)
+        {
+            rb.angularVelocity = Vector3.zero;
+            rb.linearVelocity = Vector3.zero;
+            yield return new WaitForFixedUpdate();
+        }
+    }
 }

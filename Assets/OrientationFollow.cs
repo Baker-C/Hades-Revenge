@@ -8,7 +8,7 @@ public class OrientationFollow : MonoBehaviour
     void Update()
     {
         transform.position = follow.position;
-        if (pc != null && pc.LockedOn())
+        if (pc != null && PlayerState.IsLockedOn())
             transform.rotation = follow.rotation;
     }
 }

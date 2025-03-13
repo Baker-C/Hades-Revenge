@@ -9,13 +9,13 @@ public class PlayerControl : CharacterControl
     [SerializeField] LayerMask collisionMask;
     [SerializeField] Animator stateCamAnimator;
 
+    public bool locked = false;
+    public bool dashCD = false;
+    
     int VelocityXHash;
     int VelocityZHash;
     int LockedOnHash;
 
-    float velocityX = 0.0f;
-    float velocityZ = 0.0f;
-    [SerializeField] bool locked = false;
 
     UnlockedMovement unlockedMovement;
     LockedMovement lockedMovement;
@@ -36,24 +36,39 @@ public class PlayerControl : CharacterControl
     void Update()
     {
         if (PlayerState.IsBusy())
+        {
+            AnimateMovement(0,0);
             return;
-
+        }
         bool lockTogglePressed = Input.GetKeyDown("q");
         if (lockTogglePressed)
             ToggleLockedOn();
     }
 
+    public void DashCooldown(float time)
+    {
+        StartCoroutine(DashCooldownRoutine(time));
+    }
+
+    IEnumerator DashCooldownRoutine(float time)
+    {
+        dashCD = true;
+        yield return new WaitForSeconds(time);
+        dashCD = false;
+    }
+
     public void ToggleLockedOn()
     {
         locked = !locked;
-        lockedMovement.enabled = locked;
-        unlockedMovement.enabled = !locked;
+        if (lockedMovement)
+            lockedMovement.enabled = locked;
+        if (unlockedMovement)
+            unlockedMovement.enabled = !locked;
         stateCamAnimator.SetBool(LockedOnHash, locked);
-    }
-
-    public bool LockedOn()
-    {
-        return locked;
+        if (locked)
+            PlayerState.LockMovement();
+        else
+            PlayerState.UnlockMovement();
     }
 
     public void AnimateMovement(float x, float z)
@@ -62,11 +77,30 @@ public class PlayerControl : CharacterControl
         animator.SetFloat(VelocityZHash, z);
     }
 
-    override public void ApplyKnockback(Vector3 direction)
+    override public void ApplyKnockback(float amount, Vector3 direction)
     {
+        base.ApplyKnockback(amount, direction);
         PlayerState.MakeBusyForTime(GetAnimationLength("Knockback"));
-        animator.Play("Knockback", 0, 0f);
     }
+
+    override public void Die()
+    {
+        PlayerState.MakeBusy();
+        animator.SetBool("Dead", true);
+        animator.Play("Death");
+        StartCoroutine(Respawn());
+    }
+
+    IEnumerator Respawn()
+    {
+        yield return new WaitForSeconds(3.0f);
+        transform.position = PlayerState.GetSpawnPosition();
+        cHealth.ResetHealth();
+        PlayerState.FreeActionState();
+        animator.SetBool("Dead", false);
+    }
+
+
 
     
 }

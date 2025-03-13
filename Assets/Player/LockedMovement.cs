@@ -1,5 +1,6 @@
 using UnityEngine;
 using Unity.Cinemachine;
+using System.Collections;
 
 public class LockedMovement : MonoBehaviour
 {
@@ -7,7 +8,7 @@ public class LockedMovement : MonoBehaviour
     [Header("References")]
     [SerializeField] Transform orientation;
     [SerializeField] Rigidbody rb;
-    [SerializeField] Transform camera;
+    [SerializeField] Transform cam;
     [SerializeField] CinemachineCamera lockOnCam;
     [SerializeField] Transform target;
     Vector3 targetDirection;
@@ -22,17 +23,19 @@ public class LockedMovement : MonoBehaviour
     [SerializeField] float leftOffset;
     [SerializeField] float rightOffset;
 
+
     [Header("LockOn")]
+    [SerializeField] Transform targetLockOnLocator;
     [Tooltip("Angle_Degree")] [SerializeField] float maxNoticeAngle = 60;
     [SerializeField] float noticeZone = 10;
     [SerializeField] LayerMask targetLayers;
-    [SerializeField] Transform enemyTarget_Locator;
     [SerializeField] float crossHair_Scale = 5f;
 
-    bool lockedOn;
+
     float movementX = 0.0f;
     float movementZ = 0.0f;
     Vector3 movement;
+
 
     bool forwardPressed;
     bool backPressed;
@@ -40,32 +43,36 @@ public class LockedMovement : MonoBehaviour
     bool rightPressed;
     bool sprintPressed;
 
+
     PlayerControl pc;
+
 
     [Header("Settings")]
     [SerializeField] bool zeroVert_Look;
     float currentYOffset;
 
-    void Awake()
+
+    void OnEnable()
     {
-        pc = GetComponent<PlayerControl>();
+        if (!pc) pc = GetComponent<PlayerControl>();
         CalculateTarget();
     }
 
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (PlayerState.IsBusy())
-            return;
-            
-        if (target == null)
+        CalculateRotation();
+
+        if (target == null || Vector3.Distance(transform.position, target.position) > noticeZone)
         {
             pc.ToggleLockedOn();
             return;
         }
 
-        // Cam lock on to target
-        lockOnCam.LookAt = target;
+        DrawLockOnIndicator();
+        
+        if (PlayerState.IsBusy() || pc.dashCD)
+            return;
 
         forwardPressed = Input.GetKey("w");
         backPressed = Input.GetKey("s");
@@ -75,16 +82,19 @@ public class LockedMovement : MonoBehaviour
 
         // Move Player
         CalculateVelocity();
+
         transform.position += movement * Time.fixedDeltaTime;        
 
-        CalculateRotation();
-
-        pc.AnimateMovement(0f, Mathf.Abs(movement.magnitude) * 2 / sprintSpeed);
+        pc.AnimateMovement(movementX * 2 / sprintSpeed, movement.z * 2 / sprintSpeed);
     }
 
     void CalculateRotation()
     {
+        if (target == null)
+            return;
+
         targetDirection = target.position - transform.position;
+        targetDirection.y = transform.position.y;
 
         // Base rotation towards target
         Quaternion baseRotation = Quaternion.LookRotation(targetDirection);
@@ -105,7 +115,8 @@ public class LockedMovement : MonoBehaviour
 
     void OnDrawGizmos()
     {
-        Gizmos.DrawWireSphere(target.position, 1);
+        if (PlayerState.IsBusy())
+            Gizmos.DrawWireSphere(transform.position, 1);
     }
 
     void CalculateVelocity()
@@ -127,9 +138,9 @@ public class LockedMovement : MonoBehaviour
         if (inputDir.y == 0)
             movementZ = Mathf.MoveTowards(movementZ, 0, Time.fixedDeltaTime * deceleration);
 
-        // Convert to camera relative movement
-        Vector3 camForward = camera.forward;
-        Vector3 camRight = camera.right;
+        // Convert to cam relative movement
+        Vector3 camForward = cam.forward;
+        Vector3 camRight = cam.right;
         camForward.y = 0f;
         camRight.y = 0f;
         camForward.Normalize();
@@ -138,11 +149,12 @@ public class LockedMovement : MonoBehaviour
         movement = (camForward * movementZ + camRight * movementX);
     }
 
+
+
     void CalculateTarget()
     {
         Collider[] nearbyTargets = Physics.OverlapSphere(transform.position, noticeZone, targetLayers);
-        float closestAngle = maxNoticeAngle;
-        target = null;
+        Debug.Log("Nearby Targets: " + nearbyTargets.Length);
         if (nearbyTargets.Length <= 0)
         {
             pc.ToggleLockedOn();
@@ -151,10 +163,16 @@ public class LockedMovement : MonoBehaviour
 
         for (int i = 0; i < nearbyTargets.Length; i++)
         {
-            Debug.Log("NearbyTarget: " + nearbyTargets[i].name);
-            Vector3 dir = nearbyTargets[i].transform.position - camera.position;
+            Debug.Log($"Nearby target {i+1}: {nearbyTargets[i].name}");
+        }
+
+        target = null;
+        float closestAngle = maxNoticeAngle;
+        for (int i = 0; i < nearbyTargets.Length; i++)
+        {
+            Vector3 dir = nearbyTargets[i].transform.position - cam.position;
             dir.y = 0;
-            float _angle = Vector3.Angle(camera.forward, dir);
+            float _angle = Vector3.Angle(cam.forward, dir);
             
             if (_angle < closestAngle)
             {
@@ -168,25 +186,30 @@ public class LockedMovement : MonoBehaviour
             pc.ToggleLockedOn();
             return;
         }
+    }
 
+    void DrawLockOnIndicator()
+    {
         // Calculate lockon height
         float h1 = target.GetComponent<CapsuleCollider>().height;
         float h2 = target.localScale.y;
         float h = h1 * h2;
-        float half_h = (h / 2) / 2;
+        float half_h = (h / 2);
         currentYOffset = h - half_h;
-        if(zeroVert_Look && currentYOffset > 1.6f && currentYOffset < 1.6f * 3) currentYOffset = 1.6f;
         
-        Vector3 tarPos = target.position + new Vector3(0, currentYOffset, 0);
-        if(Blocked(tarPos))
+        target.position += Vector3.up * currentYOffset;
+        if(Blocked(target.position))
         {
+            targetLockOnLocator.position = Vector3.up * 1000;
             pc.ToggleLockedOn();
             return;
         }
-        tarPos.y = h + 0.2f;
+        lockOnCam.LookAt = target;
 
-        enemyTarget_Locator.position = tarPos;
-        lockOnCam.LookAt = enemyTarget_Locator;
+        targetLockOnLocator.position = target.position - Vector3.up * currentYOffset;
+
+        float scale = crossHair_Scale * Mathf.Sqrt(Vector3.Distance(transform.position, target.position));
+        targetLockOnLocator.localScale = new Vector3(scale, scale, scale);
 
     }
 
@@ -198,5 +221,4 @@ public class LockedMovement : MonoBehaviour
         }
         return false;
     }
-
 }

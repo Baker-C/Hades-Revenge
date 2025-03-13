@@ -6,7 +6,9 @@ public class UnlockedMovement : MonoBehaviour
     [Header("References")]
     public Transform orientation;
     public Rigidbody rb;
-    public Transform camera;
+    public Transform cam;
+    
+    [Header("Movement")]
     public float sprintSpeed;
     public float walkSpeed;
     public float rotationSpeed;
@@ -25,9 +27,8 @@ public class UnlockedMovement : MonoBehaviour
     bool rightPressed;
     bool sprintPressed;
 
-
     
-    private PlayerControl pc;
+    PlayerControl pc;
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -37,8 +38,8 @@ public class UnlockedMovement : MonoBehaviour
 
     // Update is called once per frame
     void FixedUpdate()
-    {
-        if (PlayerState.IsBusy())
+    {            
+        if (PlayerState.IsBusy() && !PlayerState.IsJumping())
             return;
 
         forwardPressed = Input.GetKey("w");
@@ -48,8 +49,12 @@ public class UnlockedMovement : MonoBehaviour
         sprintPressed = Input.GetKey("left shift");
 
         // Move Player
+        CalculateDirection();
         CalculateVelocity();
-        transform.position += movement * Time.fixedDeltaTime;
+        if (PlayerState.IsJumping())
+            transform.position += movement / 3 * Time.fixedDeltaTime;
+        else
+            transform.position += movement * Time.fixedDeltaTime;
 
         // // Animate - MAY USE LATER, MAY NOT
         // // Get dot product between forward vectors
@@ -64,8 +69,7 @@ public class UnlockedMovement : MonoBehaviour
         // if (angle < 0.1f)
         //     velocityZ = 2;
 
-        // Move player relative to camera orientation
-        CalculateDirection();
+        // Move player relative to cam orientation
 
         Quaternion targetRotation = Quaternion.LookRotation(targetDirection);
 
@@ -99,9 +103,9 @@ public class UnlockedMovement : MonoBehaviour
         if (inputDir.y == 0)
             movementZ = Mathf.MoveTowards(movementZ, 0, Time.fixedDeltaTime * deceleration);
 
-        // Convert to camera relative movement
-        Vector3 camForward = camera.forward;
-        Vector3 camRight = camera.right;
+        // Convert to cam relative movement
+        Vector3 camForward = cam.forward;
+        Vector3 camRight = cam.right;
         camForward.y = 0f;
         camRight.y = 0f;
         camForward.Normalize();
@@ -113,7 +117,7 @@ public class UnlockedMovement : MonoBehaviour
 
     void CalculateDirection()
     {
-        inputDirection = camera.forward * (forwardPressed ? 1 : 0) + camera.right * (rightPressed ? 1 : 0) + camera.forward * (backPressed ? -1 : 0) + camera.right * (leftPressed ? -1 : 0);
+        inputDirection = cam.forward * (forwardPressed ? 1 : 0) + cam.right * (rightPressed ? 1 : 0) + cam.forward * (backPressed ? -1 : 0) + cam.right * (leftPressed ? -1 : 0);
 
         if (inputDirection.magnitude == 0)
             return;
